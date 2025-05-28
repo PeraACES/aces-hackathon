@@ -58,7 +58,7 @@
     }
 
     .navbar {
-      background: linear-gradient( #095f1c, #07220f) !important;
+      background: black !important;
     }
     .btn.btn-link, .navbar .navbar-nav > a.btn.btn-link {
         color: #DAE577 !important;
@@ -75,7 +75,27 @@
     }
 
     .footer{
-      background: linear-gradient( #095f1c, #07220f) !important;
+      background: black !important;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .footer .nav-link{
+      color: white !important;
+    }
+
+    .footer .nav-link:hover{
+      color: #DAE577 !important;
+    }
+
+    .footer #footer-donut{
+      position: absolute;
+      bottom: -10%;
+      left: 0%;
+      width: 600px;
+      z-index: 2;
+      opacity: 0.1;
+      filter: blur(1px);
     }
 
     .paras {
@@ -347,6 +367,35 @@
       background-repeat: no-repeat;
       background: linear-gradient( #010c01, #032b01) !important;
     }
+
+    #header-donut{
+      position: absolute;
+      bottom: -10%;
+      left: 0%;
+      width: 500px;
+      z-index: 2;
+      opacity: 0.1;
+      filter: blur(1px);
+    }
+
+    #header-donut2{
+      position: absolute;
+      bottom: 0%;
+      right: 0%;
+      width: 700px;
+      z-index: 2;
+      opacity: 0.1;
+      transform: scaleX(-1);
+      filter: blur(5px);
+    }
+
+    #gooey-button {
+      background-color: #095f1c;
+    }
+
+    #gooey-button .bubbles .bubble{
+      background-color: #095f1c;
+    }
   </style>
 </head>
 
@@ -432,7 +481,9 @@
   <div class="wrapper">
     <div class="page-header header-filter">
       <div id="three-container"></div>
-      <canvas id="flame-canvas"></canvas>      
+      <canvas id="flame-canvas"></canvas>
+      <img id="header-donut" src="./assets/img/donut.png" alt="">    
+      <img id="header-donut2" src="./assets/img/donut.png" alt="">    
       <div class="container-fluid">
         <div class="row">
           <div class="row content-center">
@@ -942,6 +993,7 @@
 
   </div>
   <footer class="footer shadow-sm">
+    <img id="footer-donut" src="./assets/img/donut.png" alt="">    
     <div class="container">
       <div class="row ml-auto">
         <div class="col-md-5 col-sm-12">

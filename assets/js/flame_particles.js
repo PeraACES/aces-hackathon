@@ -1,91 +1,98 @@
 const canvas = document.getElementById('flame-canvas');
-    const ctx = canvas.getContext('2d');
-    let width = canvas.width = window.innerWidth;
-    let height = canvas.height = window.innerHeight;
+const ctx = canvas.getContext('2d');
+let width = canvas.width = window.innerWidth;
+let height = canvas.height = window.innerHeight;
 
-    const emberColors = ['#ff4500', '#ff8c00', '#ffa500', '#ffd700'];
+const emberColors = ['#ff4500', '#ffa500', '#ffff33'];
+let wind = 0;
+let windTimer = 0;
 
-    let wind = 0;
-    let windChangeTimer = 0;
+class Ember {
+    constructor() {
+    this.reset();
+    }
 
-    class Particle {
-      constructor() {
+    reset() {
+    this.x = Math.random() * width;
+    this.y = height + Math.random() * 100;
+    this.length = 20 + Math.random() * 30;
+    this.alpha = 0.8;
+    this.scale = 1 + Math.random();
+    this.angle = Math.random() * Math.PI * 2;
+    this.color = emberColors[Math.floor(Math.random() * emberColors.length)];
+    this.curve = (Math.random() - 0.5) * 40;
+    this.velocity = Math.random() * 5 + 2;
+    }
+
+    update() {
+    this.y -= this.velocity;
+    this.x += wind * 0.6 + Math.sin(this.angle) * 0.3;
+    this.angle += 0.01;
+    this.alpha -= 0.004;
+
+    if (this.alpha <= 0 || this.y < -50 || this.x < -50 || this.x > width + 50) {
         this.reset();
-      }
-
-      reset() {
-        this.x = Math.random() * width;
-        this.y = height + Math.random() * 100;
-        this.alpha = 0.6 + Math.random() * 0.4;
-        this.scale = 0.5 + Math.random() * 1.5;
-        this.velocity = 2 + Math.random() * 5;
-        this.angle = Math.random() * Math.PI * 2;
-        this.color = emberColors[Math.floor(Math.random() * emberColors.length)];
-        this.windOffset = 0;
-        this.length = 10 + Math.random() * 20;
-      }
-
-      update() {
-        this.y -= this.velocity;
-        this.windOffset += wind * 0.05;
-        this.x += Math.sin(this.angle) * 0.5 + this.windOffset;
-        this.angle += 0.01;
-        this.alpha -= 0.003;
-        this.scale *= 0.995;
-
-        if (this.alpha <= 0 || this.y < -20 || this.x < -20 || this.x > width + 20) {
-          this.reset();
-        }
-      }
-
-      draw(ctx) {
-        ctx.beginPath();
-        ctx.strokeStyle = this.toRGBA(this.color, this.alpha);
-        ctx.lineWidth = this.scale;
-        const endX = this.x + Math.cos(this.angle) * this.length;
-        const endY = this.y + Math.sin(this.angle) * this.length;
-        ctx.moveTo(this.x, this.y);
-        ctx.lineTo(endX, endY);
-        ctx.stroke();
-      }
-
-      toRGBA(hex, alpha) {
-        const bigint = parseInt(hex.slice(1), 16);
-        const r = (bigint >> 16) & 255;
-        const g = (bigint >> 8) & 255;
-        const b = bigint & 255;
-        return `rgba(${r},${g},${b},${alpha})`;
-      }
+    }
     }
 
-    const particles = Array.from({ length: 200 }, () => new Particle());
+    draw(ctx) {
+    const endX = this.x + Math.cos(this.angle) * this.length;
+    const endY = this.y + Math.sin(this.angle) * this.length;
 
-    function updateWind(deltaTime) {
-      windChangeTimer += deltaTime;
-      if (windChangeTimer > 2000) {
-        wind = (Math.random() - 0.5) * 1;
-        windChangeTimer = 0;
-      }
+    const ctrlX = this.x + this.curve;
+    const ctrlY = this.y - this.length / 2;
+
+    const grad = ctx.createLinearGradient(this.x, this.y, endX, endY);
+    grad.addColorStop(0, `rgba(255,255,255,0)`);
+    grad.addColorStop(0.3, this.toRGBA(this.color, this.alpha));
+    grad.addColorStop(1, `rgba(255,255,255,0)`);
+
+    ctx.beginPath();
+    ctx.moveTo(this.x, this.y);
+    ctx.quadraticCurveTo(ctrlX, ctrlY, endX, endY);
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = this.scale;
+    ctx.lineCap = 'round';
+    ctx.stroke();
     }
 
-    let lastTime = performance.now();
-    function animate(time) {
-      const deltaTime = time - lastTime;
-      lastTime = time;
-
-      updateWind(deltaTime);
-
-      ctx.clearRect(0, 0, width, height);
-      for (const p of particles) {
-        p.update();
-        p.draw(ctx);
-      }
-      requestAnimationFrame(animate);
+    toRGBA(hex, alpha) {
+    const bigint = parseInt(hex.slice(1), 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return `rgba(${r},${g},${b},${alpha})`;
     }
+}
 
-    window.addEventListener('resize', () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-    });
+const embers = Array.from({ length: 10 }, () => new Ember());
 
-    animate(lastTime);
+function updateWind(dt) {
+    windTimer += dt;
+    if (windTimer > 2000) {
+    wind = (Math.random() - 0.5) * 1;
+    windTimer = 0;
+    }
+}
+
+let last = performance.now();
+function animate(now) {
+    const dt = now - last;
+    last = now;
+
+    updateWind(dt);
+
+    ctx.clearRect(0, 0, width, height);
+    for (const ember of embers) {
+    ember.update();
+    ember.draw(ctx);
+    }
+    requestAnimationFrame(animate);
+}
+
+window.addEventListener('resize', () => {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+});
+
+animate(last);
