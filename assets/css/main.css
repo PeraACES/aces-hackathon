@@ -474,7 +474,7 @@ body{margin-top:20px;}
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.5s ease-in-out;
+  transition: transform 0.75s ease-in-out;
 }
 
 .loader img {
